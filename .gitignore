@@ -2,8 +2,15 @@
 /dist
 /node_modules
 /build
+/tmp
 /grading-key
 .claude
+
+# Assessment brief artifacts generated outside the app source
+/ASSESSMENT.md
+/assets/logo.svg
+/output/pdf/
+/scripts/generate_assessment_pdf.py
 
 # Logs
 logs
