@@ -1,14 +1,72 @@
-# Ella API - QA Assessment
+# Ella API — QA / DevOps Intern Assessment
 
-This repository contains a NestJS API designed for QA Engineer assessments. It simulates an e-commerce backend with Users, Products, and Transactions modules.
+This repository contains a NestJS API used to assess **QA / DevOps Intern** candidates. It
+simulates an e-commerce backend with **Users**, **Products**, and **Transactions** modules.
 
-## Assessment Instructions
+The assessment has two tracks that mirror the role: a **Quality Assurance** track and a
+**DevOps** track. Please attempt **both**. We're more interested in how you think, how you
+document your work, and your attention to detail than in how many items you finish.
 
-Your task is to verify the quality of this API. This includes:
-1.  **Exploratory Testing**: Identify and document bugs in the system.
-2.  **Unit Tests**: Write unit tests for **ONE** of the modules (Users, Products, or Transactions) to ensure logic correctness.
-3.  **API Testing**: Create a Postman collection to test the endpoints.
-4.  **Performance Testing**: Create a k6 script to load test one of the endpoints.
+> **Time-box:** aim for roughly 1–2 days. If you run out of time, prioritise depth over
+> breadth and write down what you *would* have done next.
+
+---
+
+## Track A — Quality Assurance
+
+1. **Exploratory & functional testing**
+   Explore the API and hunt for bugs. The system contains several defects that behave
+   incorrectly. For each bug, log a clear report containing: a title, severity, steps to
+   reproduce, expected vs. actual result, and (where possible) the endpoint/payload used.
+   A `BUGS.md` file or a Jira-style export is fine.
+
+2. **Test cases from acceptance criteria**
+   Pick **one** module (Users, Products, or Transactions) and write manual test cases
+   derived from its expected behaviour (positive, negative, and edge cases).
+
+3. **Unit tests**
+   Write automated unit tests for **one** module to verify its logic. Run with `npm test`.
+
+4. **API testing (Postman)**
+   Create a Postman collection that exercises the endpoints (happy paths + validation /
+   error cases). Export it and include it in your submission.
+
+5. **Performance testing (k6)** *(nice to have)*
+   Write a k6 script to load-test one endpoint and summarise the results.
+
+---
+
+## Track B — DevOps
+
+1. **CI/CD pipeline**
+   Add a CI pipeline (GitHub Actions is preferred — `.github/workflows/ci.yml`) that, on
+   every push and pull request, installs dependencies, runs the linter, builds the project,
+   and runs the unit tests. The pipeline should **fail** when any step fails. Include a
+   short note on how you'd extend it toward continuous **deployment**.
+
+2. **Containerization & build troubleshooting**
+   Bring the full stack up with Docker (`docker compose up -d --build`). Review the
+   `Dockerfile`, `docker-compose.yml`, and `docker-compose.dev.yml`. Document any problems
+   you hit getting a clean build/run, how you diagnosed them, and how you fixed them.
+
+3. **Environment configuration**
+   Using `.env.example` as a starting point, document the environment variables required
+   for the **development**, **staging**, and **testing** environments, and explain what
+   changes between them.
+
+4. **Health checks & monitoring** *(nice to have)*
+   Add a simple health-check endpoint (e.g. `GET /health`) **or** describe how you would
+   monitor this service's application logs and basic system health in a running environment.
+
+5. **Deployment runbook**
+   Write a short runbook / troubleshooting guide (Markdown, Confluence-style) covering how
+   to build, deploy, and roll back this service, plus common failures and their fixes.
+
+6. **Cloud deployment plan** *(bonus)*
+   Briefly describe, at a beginner level, how you would deploy this containerized app to a
+   cloud platform of your choice (AWS, Azure, or GCP).
+
+---
 
 ## Getting Started
 
@@ -23,19 +81,25 @@ Your task is to verify the quality of this API. This includes:
    npm install
    ```
 
-2. **Start Database (Docker)**
+2. **Configure environment variables**
+   ```bash
+   cp .env.example .env
+   # then edit .env if needed
+   ```
+
+3. **Start the database (Docker)**
    ```bash
    docker compose -f docker-compose.dev.yml up -d
    ```
 
-3. **Run Migrations**
+4. **Run migrations**
    Generate and run migrations to set up the database schema:
    ```bash
    npm run migration:generate
    npm run migration:run
    ```
 
-4. **Start Application**
+5. **Start the application**
    ```bash
    npm run start:dev
    ```
@@ -50,8 +114,7 @@ Once the application is running, you can access the Swagger documentation at:
 
 ## Testing
 
-As part of the assessment, you are expected to create tests.
-- **Unit Tests**: `npm test` (configured to run Jest)
+- **Unit Tests**: `npm test` (Jest)
 - **E2E Tests**: `npm run test:e2e`
 
 ## Deployment (Docker)
@@ -61,3 +124,19 @@ To build and run the entire stack (App + DB):
 ```bash
 docker compose up -d --build
 ```
+
+---
+
+## Submission
+
+Please submit a Git repository (or an archive) containing your work. A clear structure is
+appreciated, for example:
+
+```
+/qa       # BUGS.md, test cases, unit tests, Postman collection, k6 script
+/devops   # CI workflow, runbook, environment notes, cloud plan
+README-SUBMISSION.md   # short summary of what you did and how to run it
+```
+
+Include a brief summary of your findings, the decisions you made, and anything you'd
+improve with more time.
