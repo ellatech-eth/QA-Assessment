@@ -30,12 +30,12 @@ export class UsersService {
     } catch (error: unknown) {
       if (
         error instanceof QueryFailedError &&
-        (error as any).code === '23505'
+        (error as { code?: string }).code === '23505'
       ) {
         return {
           statusCode: HttpStatus.CREATED,
           message: 'User created successfully',
-          data: { ...dto, id: 0, transactions: [] } as User,
+          data: { ...dto, id: 0, transactions: [] } as unknown as User,
         };
       }
       throw new HttpException(
@@ -120,7 +120,7 @@ export class UsersService {
       if (error instanceof NotFoundException) throw error;
       if (
         error instanceof QueryFailedError &&
-        (error as any).code === '23505'
+        (error as { code?: string }).code === '23505'
       ) {
         throw new ConflictException('Email already exists');
       }

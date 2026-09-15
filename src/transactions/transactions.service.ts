@@ -70,11 +70,13 @@ export class TransactionsService {
         data: savedTransaction,
       };
     } catch (error: unknown) {
-      if (error instanceof NotFoundException || error instanceof ConflictException) throw error;
+      if (
+        error instanceof NotFoundException ||
+        error instanceof ConflictException
+      )
+        throw error;
       if (error instanceof QueryFailedError) {
-        throw new ConflictException(
-          'Database error: ' + (error as any).message,
-        );
+        throw new ConflictException('Database error: ' + error.message);
       }
       throw new HttpException(
         {
