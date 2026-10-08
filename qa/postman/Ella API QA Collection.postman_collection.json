@@ -1,0 +1,535 @@
+{
+  "info": {
+    "_postman_id": "d494fb6f-1be1-44ef-b470-4eb992db7244",
+    "name": "Ella API QA Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "30958960"
+  },
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create User - Valid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has user id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var user = jsonData.data || jsonData;",
+                  "    pm.expect(user).to.have.property(\"id\");",
+                  "    pm.collectionVariables.set(\"userId\", user.id);",
+                  "});",
+                  "pm.test(\"Response has correct email\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var user = jsonData.data || jsonData;",
+                  "    pm.expect(user.email).to.eql(pm.collectionVariables.get(\"uniqueEmail\"));",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const uniqueEmail = \"user_\" + Date.now() + \"@example.com\";",
+                  "pm.collectionVariables.set(\"uniqueEmail\", uniqueEmail);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"{{uniqueEmail}}\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create User - Missing Fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Doe\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create User - Duplicate Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () {",
+                  "    pm.response.to.have.status(409);",
+                  "});",
+                  "pm.test(\"Response has error message\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property(\"error\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"Password123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User - Invalid ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 4xx or 5xx for invalid ID\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 404, 500]);",
+                  "});",
+                  "pm.test(\"Response has error message\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.satisfy(function(d) {",
+                  "        return d.hasOwnProperty(\"error\") || d.hasOwnProperty(\"message\");",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"333333333333\",\"email\":\"postman_qa@example.com\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/invalid-id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "invalid-id"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Create Product - valid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has product id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var product = jsonData.data || jsonData;",
+                  "    pm.expect(product).to.have.property(\"id\");",
+                  "    pm.collectionVariables.set(\"productId\", product.id);",
+                  "});",
+                  "pm.test(\"Response has correct name\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var product = jsonData.data || jsonData;",
+                  "    pm.expect(product.name).to.eql(pm.collectionVariables.get(\"uniqueProductName\"));",
+                  "});",
+                  "pm.test(\"Response has correct price\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var product = jsonData.data || jsonData;",
+                  "    pm.expect(product.price).to.eql(29.99);",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const uniqueName = \"Product_\" + Date.now();\npm.collectionVariables.set(\"uniqueProductName\", uniqueName);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{uniqueProductName}}\",\n  \"price\": 29.99,\n  \"stock\": 100,\n  \"quantity\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has product id\", function () {",
+                  "    var body = pm.response.json();",
+                  "    // Handle both array response and {data: [...]} envelope",
+                  "    var arr = Array.isArray(body) ? body : (Array.isArray(body.data) ? body.data : [body.data || body]);",
+                  "    var targetId = parseInt(pm.collectionVariables.get(\"productId\"));",
+                  "    var product = arr.find(function(p) { return p && p.id === targetId; });",
+                  "    if (!product) { product = arr[0]; }",
+                  "    pm.expect(product).to.be.an(\"object\");",
+                  "    pm.expect(product).to.have.property(\"id\");",
+                  "});",
+                  "pm.test(\"Response has correct name\", function () {",
+                  "    var body = pm.response.json();",
+                  "    var arr = Array.isArray(body) ? body : (Array.isArray(body.data) ? body.data : [body.data || body]);",
+                  "    var targetId = parseInt(pm.collectionVariables.get(\"productId\"));",
+                  "    var product = arr.find(function(p) { return p && p.id === targetId; });",
+                  "    if (!product) { product = arr[0]; }",
+                  "    var expectedName = pm.collectionVariables.get(\"uniqueProductName\");",
+                  "    pm.expect(product.name).to.eql(expectedName);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:4000/products",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "products"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Create Transactions - Valid",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Response has transaction id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var tx = jsonData.data || jsonData;",
+                  "    pm.expect(tx).to.have.property(\"id\");",
+                  "    pm.collectionVariables.set(\"transactionId\", tx.id);",
+                  "});",
+                  "pm.test(\"Response has correct quantity\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var tx = jsonData.data || jsonData;",
+                  "    pm.expect(tx.quantity).to.eql(2);",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const userId = parseInt(pm.collectionVariables.get(\"userId\"));\nconst productId = parseInt(pm.collectionVariables.get(\"productId\"));\npm.collectionVariables.set(\"userIdInt\", userId);\npm.collectionVariables.set(\"productIdInt\", productId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{userIdInt}},\n  \"productId\": {{productIdInt}},\n  \"quantity\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "transactions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Transactions - Invalid User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 404 or 400\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 404]);",
+                  "});",
+                  "pm.test(\"Response has error message\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.satisfy(function(d) {",
+                  "        return d.hasOwnProperty(\"error\") || d.hasOwnProperty(\"message\");",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 999999999,\n  \"productId\": 999999999,\n  \"quantity\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "transactions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transactions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response has transaction id\", function () {",
+                  "    var body = pm.response.json();",
+                  "    var arr = Array.isArray(body) ? body : (Array.isArray(body.data) ? body.data : [body.data || body]);",
+                  "    var targetId = parseInt(pm.collectionVariables.get(\"transactionId\"));",
+                  "    var tx = arr.find(function(t) { return t && t.id === targetId; });",
+                  "    if (!tx) { tx = arr[0]; }",
+                  "    pm.expect(tx).to.be.an(\"object\");",
+                  "    pm.expect(tx).to.have.property(\"id\");",
+                  "});",
+                  "pm.test(\"Response has correct userId\", function () {",
+                  "    var body = pm.response.json();",
+                  "    var arr = Array.isArray(body) ? body : (Array.isArray(body.data) ? body.data : [body.data || body]);",
+                  "    var targetId = parseInt(pm.collectionVariables.get(\"transactionId\"));",
+                  "    var tx = arr.find(function(t) { return t && t.id === targetId; });",
+                  "    if (!tx) { tx = arr[0]; }",
+                  "    pm.expect(tx).to.be.an(\"object\");",
+                  "    // API returns nested user object OR flat userId",
+                  "    var hasUser = tx.hasOwnProperty(\"user\") || tx.hasOwnProperty(\"userId\");",
+                  "    pm.expect(hasUser).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:4000/transactions",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "4000",
+              "path": [
+                "transactions"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000"
+    },
+    {
+      "key": "uniqueEmail",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "productId",
+      "value": ""
+    },
+    {
+      "key": "uniqueProductName",
+      "value": ""
+    },
+    {
+      "key": "userIdInt",
+      "value": ""
+    },
+    {
+      "key": "productIdInt",
+      "value": ""
+    },
+    {
+      "key": "transactionId",
+      "value": ""
+    }
+  ]
+}

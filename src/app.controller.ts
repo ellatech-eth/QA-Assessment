@@ -9,4 +9,14 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+
+  @Get('/health')
+  getHealth() {
+    return {
+      statusCode: 200,
+      status: 'ok',
+      service: 'ella-api',
+      timestamp: new Date().toISOString(),
+    };
+  }
 }

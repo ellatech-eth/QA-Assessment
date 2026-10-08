@@ -11,6 +11,14 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ApiResponse } from 'src/constants';
 
+function isPostgresUniqueViolation(error: unknown): boolean {
+  if (!(error instanceof QueryFailedError)) {
+    return false;
+  }
+  const driverError = error.driverError as { code?: string };
+  return driverError?.code === '23505';
+}
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -28,15 +36,8 @@ export class UsersService {
         data: savedUser,
       };
     } catch (error: unknown) {
-      if (
-        error instanceof QueryFailedError &&
-        (error as any).code === '23505'
-      ) {
-        return {
-          statusCode: HttpStatus.CREATED,
-          message: 'User created successfully',
-          data: { ...dto, id: 0, transactions: [] } as User,
-        };
+      if (isPostgresUniqueViolation(error)) {
+        throw new ConflictException('Email already exists');
       }
       throw new HttpException(
         {
@@ -77,9 +78,9 @@ export class UsersService {
         where: { id },
         relations: ['transactions'],
       });
-
-      if (!user) throw new NotFoundException(`User with ID ${id} not found`);
-
+      if (!user) {
+        throw new NotFoundException(`User with ID ${id} not found`);
+      }
       return {
         statusCode: HttpStatus.OK,
         message: 'User retrieved successfully',
@@ -101,10 +102,9 @@ export class UsersService {
   async update(id: number, dto: CreateUserDto): Promise<ApiResponse<User>> {
     try {
       const user = await this.userRepository.preload({
-        id: id,
+        id,
         ...dto,
       });
-
       if (!user) {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
@@ -118,13 +118,9 @@ export class UsersService {
       };
     } catch (error: unknown) {
       if (error instanceof NotFoundException) throw error;
-      if (
-        error instanceof QueryFailedError &&
-        (error as any).code === '23505'
-      ) {
+      if (isPostgresUniqueViolation(error)) {
         throw new ConflictException('Email already exists');
       }
-
       throw new HttpException(
         {
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
